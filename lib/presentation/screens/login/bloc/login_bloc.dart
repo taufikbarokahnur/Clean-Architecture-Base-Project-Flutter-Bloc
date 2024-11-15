@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:base_flutter_bloc/core/utils/common/helper.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,33 +16,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   LoginBloc({
     required this.loginUseCase,
-  }) : super(LoginState.initial()) {
-    on<LoginEvent>(_onLoginEvent);
+  }) : super(LoginState()) {
+    on<_Login>(_onLogin);
   }
 
-  void _onLoginEvent(LoginEvent event, Emitter<LoginState> emit) async {
-    await event.when(
-      login: (username, password) => _login(
-        username,
-        password,
-        emit,
-      ),
-    );
-  }
-
-  Future<void> _login(
-    String username,
-    String password,
+  Future<void> _onLogin(
+    _Login event,
     Emitter<LoginState> emit,
   ) async {
-    emit(LoginState.loading());
-    final result = await loginUseCase(username, password, 1);
+    emit(state.copyWith(isLoading: true));
+    final result = await loginUseCase(event.username, event.password, 1);
     result.when(
       success: (data) {
-        emit(LoginState.success(data));
+        emit(state.copyWith(isLoading: false, userData: data));
       },
       failed: (e) {
-        emit(LoginState.failed(e));
+        emit(state.copyWith(isLoading: false, userError: e));
       },
     );
   }

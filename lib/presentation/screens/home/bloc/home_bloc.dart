@@ -16,19 +16,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   HomeBloc({
     required this.getUserUseCase,
-  }) : super(HomeState.initial()) {
+  }) : super(HomeState()) {
     on<_Initial>(_initial);
   }
 
   Future<void> _initial(HomeEvent event, Emitter<HomeState> emit) async {
-    emit(HomeState.userDataLoading());
+    emit(state.copyWith(isLoading: true));
     final result = await getUserUseCase();
     result.when(
       success: (data) {
-        emit(HomeState.userDataSuccess(data));
+        emit(state.copyWith(isLoading: false, userData: data));
       },
       failed: (e) {
-        emit(HomeState.userDataFailed(e));
+        emit(state.copyWith(isLoading: false, userError: e));
       },
     );
   }
